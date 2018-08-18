@@ -3,8 +3,10 @@ MAINTAINER Jobin Lawrance <jobinlawrance@gmail.com>
 
 # install deps
 ADD package.json 
-RUN yarn install && npm run grunt && npm run start
-
+RUN npm install --unsafe-perm || \
+  ((if [ -f npm-debug.log ]; then \
+      cat npm-debug.log; \
+    fi) && false) && npm run grunt
 # Copy deps
 # RUN mkdir -p /opt/hello-world-app && cp -a /tmp/node_modules /opt/hello-world-app
 
