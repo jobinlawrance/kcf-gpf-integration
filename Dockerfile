@@ -2,7 +2,7 @@ FROM node:8
 MAINTAINER Jobin Lawrance <jobinlawrance@gmail.com>
 
 # install deps
-# ADD package.json 
+ADD package.json 
 RUN yarn install && npm run grunt && npm run start
 
 # Copy deps
