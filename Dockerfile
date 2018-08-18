@@ -1,22 +1,17 @@
-# Dockerfile extending the generic Node image with application files for a
-# single application.
-FROM gcr.io/google_appengine/nodejs
+FROM node:8
+MAINTAINER Jobin Lawrance <jobinlawrance@gmail.com>
 
-# Check to see if the the version included in the base runtime satisfies
-# '>=0.12.7', if not then do an npm install of the latest available
-# version that satisfies it.
-RUN /usr/local/bin/install_node '>=0.12.7'
-COPY . /app/
+# install deps
+ADD package.json 
+RUN yarn install && npm grunt && npm start
 
-# You have to specify "--unsafe-perm" with npm install
-# when running as root.  Failing to do this can cause
-# install to appear to succeed even if a preinstall
-# script fails, and may have other adverse consequences
-# as well.
-# This command will also cat the npm-debug.log file after the
-# build, if it exists.
-RUN npm install --unsafe-perm || \
-  ((if [ -f npm-debug.log ]; then \
-      cat npm-debug.log; \
-    fi) && false)
-CMD npm start
+# Copy deps
+# RUN mkdir -p /opt/hello-world-app && cp -a /tmp/node_modules /opt/hello-world-app
+
+# Setup workdir
+WORKDIR ./
+# COPY . /opt/hello-world-app
+
+# run
+EXPOSE 8080
+CMD ["npm", "start"]
