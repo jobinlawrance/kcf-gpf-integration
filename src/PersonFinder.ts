@@ -4,12 +4,13 @@ import {parseString} from 'xml2js';
 import { map,mergeMap } from "rxjs/operators";
 import {Observable} from 'rxjs'
 import {stripPrefix} from "xml2js/lib/processors"
-import { PersonFinderData } from "./entities/PersonFinderData";
+import { PersonFinderData, PersonEntity } from "./entities/PersonFinderData";
+import { ApiResponse, MetaResponse } from './entities/ApiResponse'
 
 const http = new Rxios({
   // all regular axios request configuration options are valid here
   // check https://github.com/axios/axios#request-config
-  baseURL: 'https://google.org/personfinder/2018-kerala-flooding/feeds',
+  baseURL: 'https://www.google.org/personfinder/2018-kerala-flooding/api/',
 });
 
 const options = {
@@ -23,31 +24,28 @@ const options = {
 
 export class PersonFinder {
     public search (req: Request, res: Response,name: String) {
-        http.get<string>('/person?key=ywktrMPJEfs66cDG&role=seek&query_name='+name)
+        http.get<string>('search?key=ywktrMPJEfs66cDG&q='+name)
         .pipe(mergeMap<string,PersonFinderData>(data => {
+          console.log("Begore Json Parsing"+data);
            return new Observable<String>((observer) => {
-
-              parseString(data,{tagNameProcessors: [stripPrefix]}, function(err,result){
+              parseString(data, {tagNameProcessors: [stripPrefix]} , function(err,result){
                 //Extract the value from the data element
+                console.log("After Json Parsing"+result);
                 observer.next(result);
                 observer.complete();
               });
           });
         })).pipe(map(data => {
-          return data.feed.entry
+          console.log("Before mapping"+data);
+          return new ApiResponse<PersonEntity[]>(true,null,data.pfif.person,new MetaResponse(data.pfif.person.length))
         }))
-        // .pipe(map<string, string>(data => {
-        //   data.replace(/pfif:/g,'abc');
-        //   console.log(data)
-        //   return data;
-        // }))
         .subscribe(
             response => {
               console.log(response)
               res.status(200).send(response);
             },
             err => {
-              // console.error(err);
+              console.error(err);
               res.status(500).send(err);
             }
           );

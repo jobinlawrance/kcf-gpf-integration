@@ -2,7 +2,7 @@ FROM node:8
 MAINTAINER Jobin Lawrance <jobinlawrance@gmail.com>
 
 # install deps
-ADD package.json 
+ADD package.json / 
 RUN npm install --unsafe-perm || \
   ((if [ -f npm-debug.log ]; then \
       cat npm-debug.log; \
